@@ -65,6 +65,10 @@
     todos.value.forEach((todo) => (todo.completed = e.target.checked))
   }
 
+  function clearCompleted(){
+    todos.value = todos.value.filter(todo => !todo.completed);
+  }
+
   const remaining = computed(() => todos.value.filter(todo => !todo.completed).length)
   const anyRemaining = computed(() => remaining.value > 0 ? remaining.value : 0)
   const todosFiltered = computed(() => {
@@ -77,23 +81,26 @@
     }
     return todos.value
   })
+  const anyCompleted = computed(() => todos.value.filter(todo => todo.completed).length)
 </script>
 
 <template>
   <div>
     <input type="text" class="todo-input" placeholder="What needs to be done" v-model="newTodo" @keyup.enter="addTodo">
 
-    <div v-for="todo in todosFiltered" :key="todo.id" class="todo-item">
-      <div class="todo-item-left">
-        <input type="checkbox" v-model="todo.completed">
-        <div v-if="!todo.editing" @dblclick="editTodo(todo)" class="todo-item-label" :class="{completed : todo.completed}">{{todo.title}}</div>
-        <input v-else class="todo-item-edit" type="text" v-model="todo.title" @vue:mounted="({ el }) => el.focus()"
-               @blur="doneEdit(todo)" @keyup.enter="doneEdit(todo)" @keyup.esc="cancelEdit(todo)">
+    <transition-group name="fade" enter-active-class="animated fadeInUp" leave-active-class="animated fadeOutDown">
+      <div v-for="todo in todosFiltered" :key="todo.id" class="todo-item">
+        <div class="todo-item-left">
+          <input type="checkbox" v-model="todo.completed">
+          <div v-if="!todo.editing" @dblclick="editTodo(todo)" class="todo-item-label" :class="{completed : todo.completed}">{{todo.title}}</div>
+          <input v-else class="todo-item-edit" type="text" v-model="todo.title" @vue:mounted="({ el }) => el.focus()"
+                 @blur="doneEdit(todo)" @keyup.enter="doneEdit(todo)" @keyup.esc="cancelEdit(todo)">
+        </div>
+        <div class="remove-item" @click="removeTodo(todo)">
+          &times;
+        </div>
       </div>
-      <div class="remove-item" @click="removeTodo(todo)">
-        &times;
-      </div>
-    </div>
+    </transition-group>
 
     <div class="extra-container">
       <div><label><input type="checkbox" :checked="!anyRemaining" @change="checkAllTodos"> Check All</label></div>
@@ -107,17 +114,19 @@
         <button :class="{ active: filter === 'completed' }" @click="filter = 'completed'">Completed</button>
       </div>
 
-<!--      <div>-->
-<!--        <transition name="fade">-->
-<!--        <button v-if="showClearCompletedButton" @click="clearCompleted">Clear Completed</button>-->
-<!--        </transition>-->
-<!--      </div>-->
+      <div>
+        <transition name="fade">
+        <button v-if="anyCompleted" @click="clearCompleted">Clear Completed</button>
+        </transition>
+      </div>
 
     </div>
   </div>
 </template>
 
 <style lang="scss">
+  @import url("https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.5.2/animate.min.css");
+
   .todo-input{
     width: 100%;
     padding: 10px 18px;
@@ -201,6 +210,15 @@
 
   .active {
     background: lightgreen;
+  }
+
+  // CSS Transitions
+  .fade-enter-active, .fade-leave-active {
+    transition: opacity .2s;
+  }
+
+  .fade-enter, .fade-leave-to {
+    opacity: 0;
   }
 
 </style>
