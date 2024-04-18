@@ -1,11 +1,6 @@
 <script setup>
   import { ref, computed, watchEffect } from 'vue'
-
-  // const filters = {
-  //   all: (todos) => todos,
-  //   active: (todos) => todos.filter((todo) => !todo.completed),
-  //   completed: (todos) => todos.filter((todo) => todo.completed)
-  // }
+  import TodoItem from './TodoItem.vue'
 
   let beforeEditCache = ref()
   let newTodo = ref()
@@ -44,23 +39,6 @@
     todos.value.splice(todos.value.indexOf(todo), 1)
   }
 
-  function editTodo(todo){
-    beforeEditCache = todo.title
-    todo.editing = true
-  }
-
-  function doneEdit(todo){
-    if(todo.title.trim() == 0){
-      removeTodo(todo)
-    }
-    todo.editing = false
-  }
-
-  function cancelEdit(todo){
-    todo.title = beforeEditCache
-    todo.editing = false
-  }
-
   function checkAllTodos(e){
     todos.value.forEach((todo) => (todo.completed = e.target.checked))
   }
@@ -89,17 +67,8 @@
     <input type="text" class="todo-input" placeholder="What needs to be done" v-model="newTodo" @keyup.enter="addTodo">
 
     <transition-group name="fade" enter-active-class="animated fadeInUp" leave-active-class="animated fadeOutDown">
-      <div v-for="todo in todosFiltered" :key="todo.id" class="todo-item">
-        <div class="todo-item-left">
-          <input type="checkbox" v-model="todo.completed">
-          <div v-if="!todo.editing" @dblclick="editTodo(todo)" class="todo-item-label" :class="{completed : todo.completed}">{{todo.title}}</div>
-          <input v-else class="todo-item-edit" type="text" v-model="todo.title" @vue:mounted="({ el }) => el.focus()"
-                 @blur="doneEdit(todo)" @keyup.enter="doneEdit(todo)" @keyup.esc="cancelEdit(todo)">
-        </div>
-        <div class="remove-item" @click="removeTodo(todo)">
-          &times;
-        </div>
-      </div>
+      <TodoItem v-for="todo in todosFiltered" :key="todo.id" :todo="todo" @removeTodo="removeTodo">
+      </TodoItem>
     </transition-group>
 
     <div class="extra-container">
