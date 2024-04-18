@@ -2,7 +2,6 @@
   import { ref, computed, watchEffect } from 'vue'
   import TodoItem from './TodoItem.vue'
 
-  let beforeEditCache = ref()
   let newTodo = ref()
   let filter = ref('all')
   const idForTodo = ref(3)

@@ -1,10 +1,13 @@
 <script setup>
-  import {defineProps, defineEmits, ref } from 'vue';
+import {defineProps, defineEmits, ref, getCurrentInstance, toRefs} from 'vue';
+  const { emit } = getCurrentInstance()
 
-  defineProps({
+  const props = defineProps({
     todo: Object
   })
   defineEmits(['removeTodo'])
+
+  const { todo} = toRefs(props);
 
   // Create reactive variable for beforeEditCache
   let beforeEditCache = ref()
@@ -16,7 +19,7 @@
 
   function doneEdit(todo){
     if(todo.title.trim().length === 0){
-      return('removeTodo',todo);
+      emit('removeTodo',todo);
     }
     todo.editing = false
   }
@@ -43,6 +46,4 @@
 </template>
 
 <style >
-
-
 </style>
